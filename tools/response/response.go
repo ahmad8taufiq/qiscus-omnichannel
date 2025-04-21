@@ -41,3 +41,10 @@ func NotFound(w http.ResponseWriter, message string) {
 		"message": message,
 	})
 }
+
+func InternalServerError(w http.ResponseWriter, message string) {
+	JSONResponse(w, http.StatusInternalServerError, JSON{
+		"success": false,
+		"message": message,
+	})
+}

@@ -8,3 +8,7 @@ type Agent struct {
 	TypeAsString  string  `json:"type_as_string"`
 	IsAvailable   bool    `json:"is_available"`
 }
+
+type MaxCustomerPerAgentRequest struct {
+	MaxCustomerPerAgent int `json:"max_customer_per_agent"`
+}

@@ -44,7 +44,7 @@ func init() {
 		RedisHost:			getEnv("REDIS_HOST", ""),
 		RedisUser:			getEnv("REDIS_USER", ""),
 		RedisPassword:		getEnv("REDIS_PASSWORD", ""),
-		RedisPort:			getEnv("REDIS_PASSWORD", ""),
+		RedisPort:			getEnv("REDIS_PORT", ""),
 	}
 }
 
