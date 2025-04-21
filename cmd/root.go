@@ -1,18 +1,18 @@
 package cmd
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "qiscus-omnichannel",
-	Short: "Qiscus Omnichannel powered by Cobra",
+	Short: "CLI for Qiscus Omnichannel Integration",
 }
 
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+func Execute() error {
+	return rootCmd.Execute()
+}
+
+func init() {
+	rootCmd.AddCommand(webhookCmd)
 }

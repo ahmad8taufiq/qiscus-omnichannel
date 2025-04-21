@@ -8,5 +8,7 @@ import (
 func main() {
 	logger.InitLogger()
 
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		logger.Logger.WithError(err).Fatal("❌ Failed to execute command")
+	}
 }
