@@ -11,6 +11,10 @@ type Config struct {
 	QiscusAuthURL string
 	QiscusEmail   string
 	QiscusPassword string
+
+	RedisHost     string
+	RedisUser	  string
+	RedisPassword string
 }
 
 var AppConfig Config
@@ -25,6 +29,10 @@ func init() {
 		QiscusAuthURL:  getEnv("QISCUS_AUTH_URL", ""),
 		QiscusEmail:    getEnv("QISCUS_EMAIL", ""),
 		QiscusPassword: getEnv("QISCUS_PASSWORD", ""),
+
+		RedisHost:		getEnv("REDIS_HOST", ""),
+		RedisUser:		getEnv("REDIS_USER", ""),
+		RedisPassword:	getEnv("REDIS_PASSWORD", ""),
 	}
 }
 
