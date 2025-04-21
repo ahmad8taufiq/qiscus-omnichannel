@@ -53,7 +53,7 @@ func WebhookHandler(log *logrus.Logger, svc service.WebhookService) http.Handler
 
 		if data.CandidateAgent != nil {
 			log.WithFields(logrus.Fields{
-				"id":             data.CandidateAgent.Id,
+				"id":             data.CandidateAgent.ID,
 				"email":          data.CandidateAgent.Email,
 				"name":           data.CandidateAgent.Name,
 				"type":           data.CandidateAgent.Type,
