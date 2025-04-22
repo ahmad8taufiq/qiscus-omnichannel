@@ -51,6 +51,12 @@ func StartDequeueListener() {
 					}
 			
 					assigned = true
+					err = redisService.Enqueue("assigned", payload)
+					if err != nil {
+						log.WithError(err).Error("❌ Failed to assigned queue to Redis")
+					} else {
+						log.Info("📤 Data assigned to Redis successfully")
+					}
 			
 					log.Infof("✅ Agent assigned successfully: %+v", assignResp.Data)
 					break 
@@ -63,7 +69,7 @@ func StartDequeueListener() {
 				if err != nil {
 					log.WithError(err).Error("❌ Failed to requeue message")
 				} else {
-					time.Sleep(2 * time.Second) // optional: delay agar tidak terlalu cepat retry
+					time.Sleep(5 * time.Second)
 				}
 			}
 		} else {
