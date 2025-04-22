@@ -11,17 +11,17 @@ import (
 	"strings"
 )
 
-type AssignRepository interface {
+type AgentRepository interface {
 	AssignAgent(roomID string, agentID int) (*models.AssignAgentResponse, error)
 }
 
-type assignRepo struct{}
+type agentRepo struct{}
 
-func NewAssignRepository() AssignRepository {
-	return &assignRepo{}
+func NewAgentRepository() AgentRepository {
+	return &agentRepo{}
 }
 
-func (r *assignRepo) AssignAgent(roomID string, agentID int) (*models.AssignAgentResponse, error) {
+func (r *agentRepo) AssignAgent(roomID string, agentID int) (*models.AssignAgentResponse, error) {
 	form := url.Values{}
 	form.Add("room_id", roomID)
 	form.Add("agent_id", fmt.Sprintf("%d", agentID))
