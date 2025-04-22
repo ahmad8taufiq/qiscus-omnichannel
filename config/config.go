@@ -9,8 +9,8 @@ import (
 
 type Config struct {
 	QiscusBaseURL	string
+	QiscusApiURL	string
 
-	QiscusAuthURL	string
 	QiscusEmail		string
 	QiscusPassword	string
 
@@ -22,7 +22,9 @@ type Config struct {
 	RedisPassword	string
 	RedisPort		string
 
-	AdminTokenKey	string
+	AdminToken		string
+	SdkEmail		string
+	SdkToken		string
 }
 
 var AppConfig Config
@@ -35,8 +37,8 @@ func init() {
 
 	AppConfig = Config{
 		QiscusBaseURL:		getEnv("QISCUS_BASE_URL", ""),
+		QiscusApiURL:		getEnv("QISCUS_API_URL", ""),
 
-		QiscusAuthURL:		getEnv("QISCUS_AUTH_URL", ""),
 		QiscusEmail:		getEnv("QISCUS_EMAIL", ""),
 		QiscusPassword:		getEnv("QISCUS_PASSWORD", ""),
 
@@ -48,7 +50,9 @@ func init() {
 		RedisPassword:		getEnv("REDIS_PASSWORD", ""),
 		RedisPort:			getEnv("REDIS_PORT", ""),
 
-		AdminTokenKey:		"adminToken",
+		AdminToken:			"adminToken",
+		SdkEmail:			"sdkEmail",
+		SdkToken:			"sdkToken",
 	}
 }
 

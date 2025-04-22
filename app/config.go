@@ -12,6 +12,8 @@ import (
 	"qiscus-omnichannel/tools/response"
 	"strconv"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 func SetMaxCustomerPerAgentHandler(svc service.RedisService) http.HandlerFunc {
@@ -67,11 +69,15 @@ func GetMaxCustomerPerAgentHandler(svc service.RedisService) http.HandlerFunc {
 	}
 }
 
-func GetAdminToken(redisSvc service.RedisService) (string, error) {
-	cachedAdminToken, err := redisSvc.GetCache(config.AppConfig.AdminTokenKey)
+func GetCredentials(redisSvc service.RedisService) (adminToken, sdkEmail, sdkToken string, err error) {
+	cachedAdminToken, err := redisSvc.GetCache(config.AppConfig.AdminToken)
 	if err == nil && cachedAdminToken != "" {
 		log.Logger.Infof("✅ Cached Admin Token: %s", cachedAdminToken)
-		return cachedAdminToken, nil
+
+		cachedSdkEmail, _ := redisSvc.GetCache(config.AppConfig.SdkEmail)
+		cachedSdkToken, _ := redisSvc.GetCache(config.AppConfig.SdkToken)
+
+		return cachedAdminToken, cachedSdkEmail, cachedSdkToken, nil
 	}
 
 	authRepo := repository.NewAuthRepository(fmt.Sprintf("%s/api/v1/auth", config.AppConfig.QiscusBaseURL))
@@ -80,16 +86,33 @@ func GetAdminToken(redisSvc service.RedisService) (string, error) {
 	authResp, err := authSvc.Login(config.AppConfig.QiscusEmail, config.AppConfig.QiscusPassword)
 	if err != nil {
 		log.Logger.WithError(err).Error("❌ Login failed")
-		return "", err
+		return "", "", "", err
 	}
 
-	adminToken := authResp.Data.User.AuthenticationToken
+	log.Logger.Infof("authResp: %v", authResp)
+
+	adminToken = authResp.Data.User.AuthenticationToken
+	sdkEmail = authResp.Data.User.SdkEmail
+	sdkToken = authResp.Data.Details.SdkUser.Token
 
 	ttl := time.Hour * 24 * 30
-	if err := redisSvc.SetCache(config.AppConfig.AdminTokenKey, adminToken, ttl); err != nil {
-		log.Logger.WithError(err).Error("❌ Failed to set admin token to cache")
+	cacheItems := map[string]string{
+		config.AppConfig.AdminToken: adminToken,
+		config.AppConfig.SdkEmail:   sdkEmail,
+		config.AppConfig.SdkToken:   sdkToken,
+	}
+
+	for key, value := range cacheItems {
+		if err := redisSvc.SetCache(key, value, ttl); err != nil {
+			log.Logger.WithFields(logrus.Fields{
+				"key":   key,
+				"value": value,
+			}).WithError(err).Error("❌ Failed to set cache")
+		} else {
+			log.Logger.Infof("✅ Cached %s: %s", key, value)
+		}
 	}
 
 	log.Logger.Infof("✅ Admin Token (from login): %s", adminToken)
-	return adminToken, nil
+	return adminToken, sdkEmail, sdkToken, nil
 }

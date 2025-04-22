@@ -6,15 +6,27 @@ type AuthRequest struct {
 }
 
 type AuthResponse struct {
-	Data struct {
-		User struct {
-			ID                 int    `json:"id"`
-			Name               string `json:"name"`
-			Email              string `json:"email"`
-			AuthenticationToken string `json:"authentication_token"`
-			AppID              int    `json:"app_id"`
-			SDKEmail           string `json:"sdk_email"`
-			SDKKey             string `json:"sdk_key"`
-		} `json:"user"`
-	} `json:"data"`
+	Data            Data            `json:"data"`
+}
+
+type Data struct {
+	User User `json:"user"`
+	Details         Details         `json:"details"`
+}
+
+type User struct {
+	ID                     int     `json:"id"`
+	Name                   string  `json:"name"`
+	Email                  string  `json:"email"`
+	AuthenticationToken    string  `json:"authentication_token"`
+	AppID                  int     `json:"app_id"`
+	SdkEmail               string  `json:"sdk_email"`
+}
+
+type Details struct {
+	SdkUser      SdkUser    `json:"sdk_user"`
+}
+
+type SdkUser struct {
+	Token      string         `json:"token"`
 }

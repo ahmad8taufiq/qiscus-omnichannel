@@ -27,39 +27,60 @@ func StartDequeueListener() {
 
 		if len(payload) > 0 {
 			log.Infof("📥 Dequeued message: %s", string(payload))
-			
-			newMessage, _ := tools.Parser[models.Message](payload)
 
-			adminToken, _ := GetAdminToken(redisService)
+			newMessage, err := tools.Parser[models.Message](payload)
+			if err != nil {
+				log.WithError(err).Error("❌ Failed to parse message payload")
+				continue
+			}
+
+			adminToken, _, sdkToken, err := GetCredentials(redisService)
+			if err != nil {
+				log.WithError(err).Error("❌ Dequeue failed to get credentials")
+				err := redisService.Backqueue("new_session_queue", payload)
+				if err != nil {
+					log.WithError(err).Error("❌ Failed to backqueue message due to dequeue error")
+				}
+				time.Sleep(3 * time.Second)
+				continue
+			}
+
+			log.Infof("👤 SDK Token: %s", sdkToken)
+
 			availableAgent, err := agentService.GetAvailableAgents(adminToken, newMessage.RoomId)
 			if err != nil {
 				log.WithError(err).Error("❌ Failed to get available agents")
+				err := redisService.Backqueue("new_session_queue", payload)
+				if err != nil {
+					log.WithError(err).Error("❌ Failed to requeue message due to agent lookup failure")
+				}
+				time.Sleep(3 * time.Second)
 				continue
 			}
-			
+
 			log.Infof("👤 Available agents: %v", availableAgent)
 
 			assigned := false
 			for _, agent := range availableAgent.Data.Agents {
 				if agent.CurrentCustomerCount < 2 {
 					log.Infof("🧑 Assigning agent %s (ID: %d)", agent.Name, agent.ID)
-			
+
 					assignResp, err := agentService.AssignAgent(newMessage.RoomId, agent.ID)
 					if err != nil {
 						log.WithError(err).Error("❌ Failed to assign agent")
 						continue
 					}
-			
+
 					assigned = true
-					err = redisService.Enqueue("assigned", payload)
+					err = redisService.Enqueue("assigned", newMessage)
 					if err != nil {
-						log.WithError(err).Error("❌ Failed to assigned queue to Redis")
+						log.WithError(err).Error("❌ Failed to enqueue to assigned queue")
 					} else {
 						log.Info("📤 Data assigned to Redis successfully")
 					}
-			
+
 					log.Infof("✅ Agent assigned successfully: %+v", assignResp.Data)
-					break 
+					break
 				}
 			}
 
@@ -75,6 +96,5 @@ func StartDequeueListener() {
 		} else {
 			log.Debug("⏳ No message in queue, waiting...")
 		}
-		
 	}
 }

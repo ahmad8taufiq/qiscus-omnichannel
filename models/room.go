@@ -33,3 +33,11 @@ type MarkAsResolvedResponse struct {
 		} `json:"service"`
 	} `json:"data"`
 }
+
+type SdkRoomResponse struct {
+	Results struct {
+		Room struct {
+			LastCommentID int64 `json:"last_comment_id"`
+		} `json:"room"`
+	} `json:"results"`
+}

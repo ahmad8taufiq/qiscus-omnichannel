@@ -67,7 +67,7 @@ func (r *agentRepo) MarkAsResolved(roomID, notes, lastCommentID string) (*models
 
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Qiscus-App-Id", config.AppConfig.QiscusAppID)
-	req.Header.Add("Authorization", config.AppConfig.QiscusSecretKey)
+	req.Header.Add("Qiscus-Secret-Key", config.AppConfig.QiscusSecretKey)
 
 	client := &http.Client{}
 	res, err := client.Do(req)
