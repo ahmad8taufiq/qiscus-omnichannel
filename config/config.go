@@ -21,6 +21,8 @@ type Config struct {
 	RedisUser		string
 	RedisPassword	string
 	RedisPort		string
+
+	AdminTokenKey	string
 }
 
 var AppConfig Config
@@ -45,6 +47,8 @@ func init() {
 		RedisUser:			getEnv("REDIS_USER", ""),
 		RedisPassword:		getEnv("REDIS_PASSWORD", ""),
 		RedisPort:			getEnv("REDIS_PORT", ""),
+
+		AdminTokenKey:		"adminToken",
 	}
 }
 

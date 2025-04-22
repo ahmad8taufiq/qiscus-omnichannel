@@ -2,12 +2,16 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"qiscus-omnichannel/config"
 	"qiscus-omnichannel/models"
+	"qiscus-omnichannel/repository"
 	"qiscus-omnichannel/service"
 	log "qiscus-omnichannel/tools/logger"
 	"qiscus-omnichannel/tools/response"
 	"strconv"
+	"time"
 )
 
 func SetMaxCustomerPerAgentHandler(svc service.RedisService) http.HandlerFunc {
@@ -61,4 +65,31 @@ func GetMaxCustomerPerAgentHandler(svc service.RedisService) http.HandlerFunc {
 			"maxCustomerPerAgent": value,
 		})
 	}
+}
+
+func GetAdminToken(redisSvc service.RedisService) (string, error) {
+	cachedAdminToken, err := redisSvc.GetCache(config.AppConfig.AdminTokenKey)
+	if err == nil && cachedAdminToken != "" {
+		log.Logger.Infof("✅ Cached Admin Token: %s", cachedAdminToken)
+		return cachedAdminToken, nil
+	}
+
+	authRepo := repository.NewAuthRepository(fmt.Sprintf("%s/api/v1/auth", config.AppConfig.QiscusBaseURL))
+	authSvc := service.NewAuthService(authRepo)
+
+	authResp, err := authSvc.Login(config.AppConfig.QiscusEmail, config.AppConfig.QiscusPassword)
+	if err != nil {
+		log.Logger.WithError(err).Error("❌ Login failed")
+		return "", err
+	}
+
+	adminToken := authResp.Data.User.AuthenticationToken
+
+	ttl := time.Hour * 24 * 30
+	if err := redisSvc.SetCache(config.AppConfig.AdminTokenKey, adminToken, ttl); err != nil {
+		log.Logger.WithError(err).Error("❌ Failed to set admin token to cache")
+	}
+
+	log.Logger.Infof("✅ Admin Token (from login): %s", adminToken)
+	return adminToken, nil
 }
