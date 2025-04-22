@@ -4,13 +4,15 @@ import (
 	"io"
 	"net/http"
 
+	"qiscus-omnichannel/models"
 	"qiscus-omnichannel/service"
+	tools "qiscus-omnichannel/tools/parser"
 	"qiscus-omnichannel/tools/response"
 
 	"github.com/sirupsen/logrus"
 )
 
-func WebhookHandler(log *logrus.Logger, svc service.WebhookService) http.HandlerFunc {
+func WebhookHandler(log *logrus.Logger, redisSvc service.RedisService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			response.NotFound(w, "Method not allowed")
@@ -35,7 +37,7 @@ func WebhookHandler(log *logrus.Logger, svc service.WebhookService) http.Handler
 			"raw":      string(body),
 		}).Info("📩 Incoming request")
 
-		data, err := svc.ProcessWebhook(body)
+		data, err := tools.Parser[models.Message](body)
 		if err != nil {
 			log.WithError(err).Error("Failed to process webhook")
 			response.BadRequest(w, "Invalid JSON format")
@@ -62,6 +64,15 @@ func WebhookHandler(log *logrus.Logger, svc service.WebhookService) http.Handler
 			}).Info("🧑‍💼 Candidate Agent Details")
 		} else {
 			log.Info("⚠️ CandidateAgent is nil")
+		}
+
+		if data.IsNewSession {
+			err := redisSvc.Enqueue("new_session_queue", data)
+			if err != nil {
+				log.WithError(err).Error("❌ Failed to enqueue to Redis")
+			} else {
+				log.Info("📤 Data enqueued to Redis successfully")
+			}
 		}
 
 		response.Success(w, "Success", data)

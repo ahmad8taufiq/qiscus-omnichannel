@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"qiscus-omnichannel/app"
+	"qiscus-omnichannel/repository"
 	"qiscus-omnichannel/service"
 	"qiscus-omnichannel/tools/logger"
 
@@ -25,10 +26,10 @@ func init() {
 
 func runWebhookServer(cmd *cobra.Command, args []string) {
 	log := logger.Logger
-	svc := service.NewWebhookService()
+	redisService := service.RedisService(repository.NewRedisRepository())
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.WebhookHandler(log, svc))
+	mux.HandleFunc("/", app.WebhookHandler(log, redisService))
 
 	addr := fmt.Sprintf(":%d", port)
 	log.Infof("🚀 Webhook is running on port %d", port)

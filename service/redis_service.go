@@ -13,6 +13,8 @@ type RedisService interface {
 	GetJSON(key string, target interface{}) error
 	UpdateJSONField(key string, jsonPath string, value interface{}) error
 	DeleteJSON(key string) error
+	Enqueue(key string, value interface{}) error
+	Dequeue(key string) ([]byte, error)
 }
 
 type redisService struct {
@@ -45,4 +47,12 @@ func (s *redisService) UpdateJSONField(key string, jsonPath string, value interf
 
 func (s *redisService) DeleteJSON(key string) error {
 	return s.repo.DeleteJSON(key)
+}
+
+func (s *redisService) Enqueue(key string, value interface{}) error {
+	return s.repo.Enqueue(key, value)
+}
+
+func (s *redisService) Dequeue(key string) ([]byte, error) {
+	return s.repo.Dequeue(key)
 }

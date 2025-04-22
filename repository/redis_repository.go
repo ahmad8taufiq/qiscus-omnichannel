@@ -19,6 +19,8 @@ type RedisRepository interface {
 	GetJSON(key string, target interface{}) error
 	UpdateJSONField(key string, jsonPath string, value interface{}) error
 	DeleteJSON(key string) error
+	Enqueue(key string, value interface{}) error
+	Dequeue(key string) ([]byte, error)
 }
 
 type redisRepository struct {
@@ -95,4 +97,16 @@ func (r *redisRepository) UpdateJSONField(key string, jsonPath string, value int
 
 func (r *redisRepository) DeleteJSON(key string) error {
 	return r.client.Do(r.ctx, "JSON.DEL", key).Err()
+}
+
+func (r *redisRepository) Enqueue(key string, value interface{}) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return r.client.RPush(r.ctx, key, data).Err()
+}
+
+func (r *redisRepository) Dequeue(key string) ([]byte, error) {
+	return r.client.LPop(r.ctx, key).Bytes()
 }
