@@ -14,6 +14,7 @@ import (
 type AgentRepository interface {
 	AssignAgent(roomID string, agentID int) (*models.AssignAgentResponse, error)
 	MarkAsResolved(roomID, notes, lastCommentID string) (*models.MarkAsResolvedResponse, error)
+	GetAvailableAgents(adminToken, roomID string) (*models.AvailableAgentsResponse, error)
 }
 
 type agentRepo struct{}
@@ -81,6 +82,34 @@ func (r *agentRepo) MarkAsResolved(roomID, notes, lastCommentID string) (*models
 	}
 
 	var response models.MarkAsResolvedResponse
+	err = json.Unmarshal(bodyBytes, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response, nil
+}
+
+func (r *agentRepo) GetAvailableAgents(adminToken, roomID string) (*models.AvailableAgentsResponse, error) {
+	url := fmt.Sprintf("%s/api/v2/admin/service/available_agents?room_id=%s", config.AppConfig.QiscusBaseURL, roomID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Authorization", adminToken)
+	req.Header.Add("Qiscus-App-Id", config.AppConfig.QiscusAppID)
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	bodyBytes, _ := io.ReadAll(res.Body)
+	var response models.AvailableAgentsResponse
 	err = json.Unmarshal(bodyBytes, &response)
 	if err != nil {
 		return nil, err

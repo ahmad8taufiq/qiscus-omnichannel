@@ -24,3 +24,7 @@ func (s *agentService) AssignAgent(roomID string, agentID int) (*models.AssignAg
 func (s *agentService) MarkAsResolve(roomID, notes, lastCommentID string) (*models.MarkAsResolvedResponse, error) {
 	return s.repo.MarkAsResolved(roomID, notes, lastCommentID)
 }
+
+func (s *agentService) GetAvailableAgents(adminToken, roomID string) (*models.AvailableAgentsResponse, error) {
+	return s.repo.GetAvailableAgents(adminToken, roomID)
+}
