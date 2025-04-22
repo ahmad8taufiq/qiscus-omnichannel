@@ -7,6 +7,8 @@ import (
 
 type AgentService interface {
 	AssignAgent(roomID string, agentID int) (*models.AssignAgentResponse, error)
+	MarkAsResolved(roomID, notes, lastCommentID string) (*models.MarkAsResolvedResponse, error)
+	GetAvailableAgents(adminToken, roomID string) (*models.AvailableAgentsResponse, error)
 }
 
 type agentService struct {
@@ -21,7 +23,7 @@ func (s *agentService) AssignAgent(roomID string, agentID int) (*models.AssignAg
 	return s.repo.AssignAgent(roomID, agentID)
 }
 
-func (s *agentService) MarkAsResolve(roomID, notes, lastCommentID string) (*models.MarkAsResolvedResponse, error) {
+func (s *agentService) MarkAsResolved(roomID, notes, lastCommentID string) (*models.MarkAsResolvedResponse, error) {
 	return s.repo.MarkAsResolved(roomID, notes, lastCommentID)
 }
 

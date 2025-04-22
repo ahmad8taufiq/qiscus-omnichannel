@@ -21,6 +21,7 @@ type RedisRepository interface {
 	DeleteJSON(key string) error
 	Enqueue(key string, value interface{}) error
 	Dequeue(key string) ([]byte, error)
+	Backqueue(key string, value interface{}) error
 }
 
 type redisRepository struct {
@@ -109,4 +110,8 @@ func (r *redisRepository) Enqueue(key string, value interface{}) error {
 
 func (r *redisRepository) Dequeue(key string) ([]byte, error) {
 	return r.client.LPop(r.ctx, key).Bytes()
+}
+
+func (r *redisRepository) Backqueue(key string, value interface{}) error {
+	return r.client.LPush(r.ctx, key, value).Err()
 }

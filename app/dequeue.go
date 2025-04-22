@@ -15,6 +15,7 @@ func StartDequeueListener() {
 	log.Info("🚀 Dequeue listener started")
 
 	redisService := service.RedisService(repository.NewRedisRepository())
+	agentService := service.AgentService(repository.NewAgentRepository())
 
 	for {
 		payload, err := redisService.Dequeue("new_session_queue")
@@ -27,8 +28,44 @@ func StartDequeueListener() {
 		if len(payload) > 0 {
 			log.Infof("📥 Dequeued message: %s", string(payload))
 			
-			data, _ := tools.Parser[models.Message](payload)
-			log.Infof("🚀 Processing message: %s", data.RoomId)
+			newMessage, _ := tools.Parser[models.Message](payload)
+
+			adminToken, _ := GetAdminToken(redisService)
+			availableAgent, err := agentService.GetAvailableAgents(adminToken, newMessage.RoomId)
+			if err != nil {
+				log.WithError(err).Error("❌ Failed to get available agents")
+				continue
+			}
+			
+			log.Infof("👤 Available agents: %v", availableAgent)
+
+			assigned := false
+			for _, agent := range availableAgent.Data.Agents {
+				if agent.CurrentCustomerCount < 2 {
+					log.Infof("🧑 Assigning agent %s (ID: %d)", agent.Name, agent.ID)
+			
+					assignResp, err := agentService.AssignAgent(newMessage.RoomId, agent.ID)
+					if err != nil {
+						log.WithError(err).Error("❌ Failed to assign agent")
+						continue
+					}
+			
+					assigned = true
+			
+					log.Infof("✅ Agent assigned successfully: %+v", assignResp.Data)
+					break 
+				}
+			}
+
+			if !assigned {
+				log.Warn("⚠️ No available agent (all full), requeueing message...")
+				err := redisService.Backqueue("new_session_queue", payload)
+				if err != nil {
+					log.WithError(err).Error("❌ Failed to requeue message")
+				} else {
+					time.Sleep(2 * time.Second) // optional: delay agar tidak terlalu cepat retry
+				}
+			}
 		} else {
 			log.Debug("⏳ No message in queue, waiting...")
 		}

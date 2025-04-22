@@ -15,6 +15,7 @@ type RedisService interface {
 	DeleteJSON(key string) error
 	Enqueue(key string, value interface{}) error
 	Dequeue(key string) ([]byte, error)
+	Backqueue(key string, value interface{}) error
 }
 
 type redisService struct {
@@ -55,4 +56,8 @@ func (s *redisService) Enqueue(key string, value interface{}) error {
 
 func (s *redisService) Dequeue(key string) ([]byte, error) {
 	return s.repo.Dequeue(key)
+}
+
+func (s *redisService) Backqueue(key string, value interface{}) error {
+	return s.repo.Backqueue(key, value)
 }
