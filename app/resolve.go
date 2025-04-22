@@ -36,7 +36,8 @@ func StartResolveListener() {
 			_, sdkEmail, sdkToken, err := GetCredentials(redisService)
 			if err != nil {
 				log.WithError(err).Error("❌ MarkAsResolved failed to get credentials")
-				err := redisService.Backqueue("assigned", payload)
+				// err := redisService.Backqueue("assigned", payload)
+				err := redisService.BackQueueAtomic("assigned", string(payload))
 				if err != nil {
 					log.WithError(err).Error("❌ Failed to backqueue message due to resolve GetCredentials")
 				}
@@ -47,7 +48,8 @@ func StartResolveListener() {
 			room, err := roomService.GetRoomById(assignedMessage.RoomId, sdkToken, sdkEmail)
 			if err != nil {
 				log.WithError(err).Error("❌ MarkAsResolved failed to get room")
-				err := redisService.Backqueue("assigned", payload)
+				// err := redisService.Backqueue("assigned", payload)
+				err := redisService.BackQueueAtomic("assigned", string(payload))
 				if err != nil {
 					log.WithError(err).Error("❌ Failed to backqueue message due to resolve GetRoomById")
 				}

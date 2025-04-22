@@ -37,7 +37,8 @@ func StartDequeueListener() {
 			adminToken, _, sdkToken, err := GetCredentials(redisService)
 			if err != nil {
 				log.WithError(err).Error("❌ Dequeue failed to get credentials")
-				err := redisService.Backqueue("new_session_queue", payload)
+				// err := redisService.Backqueue("new_session_queue", payload)
+				err := redisService.BackQueueAtomic("new_session_queue", string(payload))
 				if err != nil {
 					log.WithError(err).Error("❌ Failed to backqueue message due to dequeue error")
 				}
@@ -50,7 +51,8 @@ func StartDequeueListener() {
 			availableAgent, err := agentService.GetAvailableAgents(adminToken, newMessage.RoomId)
 			if err != nil {
 				log.WithError(err).Error("❌ Failed to get available agents")
-				err := redisService.Backqueue("new_session_queue", payload)
+				// err := redisService.Backqueue("new_session_queue", payload)
+				err := redisService.BackQueueAtomic("new_session_queue", string(payload))
 				if err != nil {
 					log.WithError(err).Error("❌ Failed to requeue message due to agent lookup failure")
 				}
@@ -86,7 +88,8 @@ func StartDequeueListener() {
 
 			if !assigned {
 				log.Warn("⚠️ No available agent (all full), requeueing message...")
-				err := redisService.Backqueue("new_session_queue", payload)
+				// err := redisService.Backqueue("new_session_queue", payload)
+				err := redisService.BackQueueAtomic("new_session_queue", string(payload))
 				if err != nil {
 					log.WithError(err).Error("❌ Failed to requeue message")
 				} else {

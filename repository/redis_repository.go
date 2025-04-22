@@ -22,6 +22,7 @@ type RedisRepository interface {
 	Enqueue(key string, value interface{}) error
 	Dequeue(key string) ([]byte, error)
 	Backqueue(key string, value interface{}) error
+	BackQueueAtomic(key string, value string) error
 }
 
 type redisRepository struct {
@@ -114,4 +115,10 @@ func (r *redisRepository) Dequeue(key string) ([]byte, error) {
 
 func (r *redisRepository) Backqueue(key string, value interface{}) error {
 	return r.client.LPush(r.ctx, key, value).Err()
+}
+
+func (r *redisRepository) BackQueueAtomic(key string, value string) error {
+    script := `return redis.call('LPUSH', KEYS[1], ARGV[1])`
+    _, err := r.client.Eval(context.Background(), script, []string{key}, value).Result()
+    return err
 }

@@ -16,6 +16,7 @@ type RedisService interface {
 	Enqueue(key string, value interface{}) error
 	Dequeue(key string) ([]byte, error)
 	Backqueue(key string, value interface{}) error
+	BackQueueAtomic(key string, value string) error
 }
 
 type redisService struct {
@@ -60,4 +61,8 @@ func (s *redisService) Dequeue(key string) ([]byte, error) {
 
 func (s *redisService) Backqueue(key string, value interface{}) error {
 	return s.repo.Backqueue(key, value)
+}
+
+func (s *redisService) BackQueueAtomic(key string, value string) error {
+	return s.repo.BackQueueAtomic(key, value)
 }
