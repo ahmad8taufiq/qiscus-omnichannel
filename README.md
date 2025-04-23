@@ -39,3 +39,14 @@
     });
 </script>
 ```
+
+#### Technical Documentation
+
+- Flowchart
+  [![3GtEAS1.th.png](https://iili.io/3GtEAS1.th.png)](https://freeimage.host/i/3GtEAS1)
+
+- Sequence Diagram
+  [![3GtMwG4.th.png](https://iili.io/3GtMwG4.th.png)](https://freeimage.host/i/3GtMwG4)
+
+- Database Design
+  [![3GthszF.th.png](https://iili.io/3GthszF.th.png)](https://freeimage.host/i/3GthszF)
