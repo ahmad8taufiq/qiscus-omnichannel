@@ -62,6 +62,11 @@ func StartResolveListener() {
 			resolved, err := agentService.MarkAsResolved(assignedMessage.RoomId, "Resolved", lastCommentId)
 			if err != nil {
 				log.WithError(err).Error("❌ Failed to resolved assigned")
+				err := redisService.BackQueueAtomic("assigned", string(payload))
+				if err != nil {
+					log.WithError(err).Error("❌ Failed to mark as resolved message due to unknown error")
+				}
+				time.Sleep(3 * time.Second)
 				continue
 			}
 
