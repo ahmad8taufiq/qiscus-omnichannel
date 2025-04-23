@@ -19,3 +19,23 @@
 #### Run Resolver Listener
 
 - go run main.go resolve
+
+#### Start Chat
+
+- Please paste the script inside `<body>` tag `</body>`
+
+```
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var s,t; s = document.createElement('script'); s.type = 'text/javascript';
+        s.src = 'https://omnichannel.qiscus.com/js/qismo-v4.js'; s.async = true;
+        s.onload = s.onreadystatechange = function() { new Qismo('rvcbl-fcsngqk40iyo7ks', {
+                        options: {
+                            channel_id: 130821, qismoIframeUrl: 'https://omnichannel.qiscus.com', baseUrl: 'https://omnichannel.qiscus.com',
+                            extra_fields: [],
+                        }
+                    }); }
+        t = document.getElementsByTagName('script')[0]; t.parentNode.insertBefore(s, t);
+    });
+</script>
+```
