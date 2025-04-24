@@ -42,11 +42,14 @@
 
 #### Technical Documentation
 
-- Flowchart
-  [![3GtEAS1.th.png](https://iili.io/3GtEAS1.th.png)](https://freeimage.host/i/3GtEAS1)
+#### Flowchart
 
-- Sequence Diagram
-  [![3Muyrcx.th.png](https://iili.io/3Muyrcx.th.png)](https://freeimage.host/i/3Muyrcx)
+![Flowchart](https://raw.githubusercontent.com/ahmad8taufiq/qiscus-omnichannel/refs/heads/main/flowchart.png)
 
-- Database Design
-  [![3GthszF.th.png](https://iili.io/3GthszF.th.png)](https://freeimage.host/i/3GthszF)
+#### Sequence Diagram
+
+![Sequence Diagram](https://raw.githubusercontent.com/ahmad8taufiq/qiscus-omnichannel/refs/heads/main/sequence_diagram.png)
+
+#### Database Design
+
+![Database Design](https://raw.githubusercontent.com/ahmad8taufiq/qiscus-omnichannel/refs/heads/main/database_design.png)
