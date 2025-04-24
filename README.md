@@ -46,7 +46,7 @@
   [![3GtEAS1.th.png](https://iili.io/3GtEAS1.th.png)](https://freeimage.host/i/3GtEAS1)
 
 - Sequence Diagram
-  [![3GtMwG4.th.png](https://iili.io/3GtMwG4.th.png)](https://freeimage.host/i/3GtMwG4)
+  [![3Muyrcx.th.png](https://iili.io/3Muyrcx.th.png)](https://freeimage.host/i/3Muyrcx)
 
 - Database Design
   [![3GthszF.th.png](https://iili.io/3GthszF.th.png)](https://freeimage.host/i/3GthszF)
