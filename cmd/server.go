@@ -30,6 +30,12 @@ func runServer(_ *cobra.Command, _ []string) {
 	log := logger.Logger
 	redisRepo := repository.NewRedisRepository()
 	configService := service.RedisService(redisRepo)
+	
+	chatRepo := repository.NewChatRepository()
+	chatService := service.ChatService(chatRepo)
+
+	commentRepo := repository.NewCommentRepository()
+	commentService := service.CommentService(commentRepo)
 
 	http.HandleFunc("/config", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -37,6 +43,15 @@ func runServer(_ *cobra.Command, _ []string) {
 			app.GetMaxCustomerPerAgentHandler(configService)(w, r)
 		case http.MethodPut:
 			app.SetMaxCustomerPerAgentHandler(configService)(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	http.HandleFunc("/chat", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			app.ChatWithDelayHandler(chatService, commentService)(w, r)
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
