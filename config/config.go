@@ -10,6 +10,7 @@ import (
 type Config struct {
 	QiscusBaseURL	string
 	QiscusApiURL	string
+	QiscusApi21URL	string
 
 	QiscusEmail		string
 	QiscusPassword	string
@@ -38,6 +39,7 @@ func init() {
 	AppConfig = Config{
 		QiscusBaseURL:		getEnv("QISCUS_BASE_URL", ""),
 		QiscusApiURL:		getEnv("QISCUS_API_URL", ""),
+		QiscusApi21URL:		getEnv("QISCUS_API_21_URL", ""),
 
 		QiscusEmail:		getEnv("QISCUS_EMAIL", ""),
 		QiscusPassword:		getEnv("QISCUS_PASSWORD", ""),
