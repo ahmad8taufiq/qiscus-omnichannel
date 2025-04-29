@@ -6,6 +6,7 @@ import (
 )
 
 type AuthService interface {
+	Nonce() (*models.NonceResponse, error)
 	Login(email, password string) (*models.AuthResponse, error)
 }
 
@@ -19,4 +20,8 @@ func NewAuthService(repo repository.AuthRepository) AuthService {
 
 func (s *authService) Login(email, password string) (*models.AuthResponse, error) {
 	return s.repo.Authenticate(email, password)
+}
+
+func (s *authService) Nonce() (*models.NonceResponse, error) {
+	return s.repo.GetNonce()
 }

@@ -26,6 +26,7 @@ type Config struct {
 	AdminToken		string
 	SdkEmail		string
 	SdkToken		string
+	Nonce		string
 }
 
 var AppConfig Config
@@ -55,6 +56,7 @@ func init() {
 		AdminToken:			"adminToken",
 		SdkEmail:			"sdkEmail",
 		SdkToken:			"sdkToken",
+		Nonce:				"nonce",
 	}
 }
 

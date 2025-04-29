@@ -30,3 +30,10 @@ type Details struct {
 type SdkUser struct {
 	Token      string         `json:"token"`
 }
+
+type NonceResponse struct {
+	Results struct {
+		ExpiredAt int64  `json:"expired_at"`
+		Nonce     string `json:"nonce"`
+	} `json:"results"`
+}

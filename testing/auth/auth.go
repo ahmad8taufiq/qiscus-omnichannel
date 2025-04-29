@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	repo := repository.NewAuthRepository(fmt.Sprintf("%s/api/v1/auth", config.AppConfig.QiscusBaseURL))
+	repo := repository.NewAuthRepository()
 	svc := service.NewAuthService(repo)
 
 	authResp, err := svc.Login(config.AppConfig.QiscusEmail, config.AppConfig.QiscusPassword)

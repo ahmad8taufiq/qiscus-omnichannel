@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"qiscus-omnichannel/config"
 	"qiscus-omnichannel/models"
@@ -80,7 +79,7 @@ func GetCredentials(redisSvc service.RedisService) (adminToken, sdkEmail, sdkTok
 		return cachedAdminToken, cachedSdkEmail, cachedSdkToken, nil
 	}
 
-	authRepo := repository.NewAuthRepository(fmt.Sprintf("%s/api/v1/auth", config.AppConfig.QiscusBaseURL))
+	authRepo := repository.NewAuthRepository()
 	authSvc := service.NewAuthService(authRepo)
 
 	authResp, err := authSvc.Login(config.AppConfig.QiscusEmail, config.AppConfig.QiscusPassword)
@@ -107,7 +106,7 @@ func GetCredentials(redisSvc service.RedisService) (adminToken, sdkEmail, sdkTok
 			log.Logger.WithFields(logrus.Fields{
 				"key":   key,
 				"value": value,
-			}).WithError(err).Error("❌ Failed to set cache")
+			}).WithError(err).Error("❌ Failed to set credential cache")
 		} else {
 			log.Logger.Infof("✅ Cached %s: %s", key, value)
 		}
@@ -115,4 +114,35 @@ func GetCredentials(redisSvc service.RedisService) (adminToken, sdkEmail, sdkTok
 
 	log.Logger.Infof("✅ Admin Token (from login): %s", adminToken)
 	return adminToken, sdkEmail, sdkToken, nil
+}
+
+func GetNonce(redisSvc service.RedisService) (nonce string, err error) {
+	cachedNonce, err := redisSvc.GetCache(config.AppConfig.Nonce)
+	if err == nil && cachedNonce != "" {
+		log.Logger.Infof("✅ Cached Nonce: %s", cachedNonce)
+
+		return cachedNonce, nil
+	}
+
+	authRepo := repository.NewAuthRepository()
+	authSvc := service.NewAuthService(authRepo)
+
+	nonceResp, err := authSvc.Nonce()
+	if err != nil {
+		log.Logger.WithError(err).Error("❌ Get Nonce failed")
+		return "", err
+	}
+
+	log.Logger.Infof("nonceResp: %v", nonceResp)
+
+	ttl := time.Minute * 10
+	if err := redisSvc.SetCache(config.AppConfig.Nonce, nonceResp.Results.Nonce, ttl); err != nil {
+		log.Logger.WithFields(logrus.Fields{
+			"key":   config.AppConfig.Nonce,
+			"value": nonceResp.Results.Nonce,
+		}).WithError(err).Error("❌ Failed to set nonce cache")
+	}
+
+	log.Logger.Infof("✅ Nonce (from qiscus): %s", nonceResp.Results.Nonce)
+	return nonceResp.Results.Nonce, nil
 }
