@@ -6,6 +6,7 @@ import (
 	"qiscus-omnichannel/app"
 	"qiscus-omnichannel/repository"
 	"qiscus-omnichannel/service"
+	"qiscus-omnichannel/tools/console"
 	"qiscus-omnichannel/tools/logger"
 
 	"github.com/spf13/cobra"
@@ -32,7 +33,7 @@ func runWebhookServer(cmd *cobra.Command, args []string) {
 	mux.HandleFunc("/", app.WebhookHandler(log, redisService))
 
 	addr := fmt.Sprintf(":%d", port)
-	log.Infof("🚀 Webhook is running on port %d", port)
+	console.ConsoleGreet("Webhook", "1.0.0", "", port)
 
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatalf("❌ Failed to start server: %v", err)

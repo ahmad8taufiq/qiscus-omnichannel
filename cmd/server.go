@@ -7,6 +7,7 @@ import (
 	"qiscus-omnichannel/app"
 	"qiscus-omnichannel/repository"
 	"qiscus-omnichannel/service"
+	"qiscus-omnichannel/tools/console"
 	"qiscus-omnichannel/tools/logger"
 
 	"github.com/spf13/cobra"
@@ -42,7 +43,8 @@ func runServer(_ *cobra.Command, _ []string) {
 	})
 
 	addr := fmt.Sprintf(":%d", serverPort)
-	log.Infof("🚀 Server running on port %d", serverPort)
+	console.ConsoleGreet("Web Server", "1.0.0", "", serverPort)
+	
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatalf("❌ Failed to start constant server: %v", err)
 	}
