@@ -17,9 +17,7 @@ type AuthRepository interface {
 	Authenticate(email, password string) (*models.AuthResponse, error)
 }
 
-type authRepository struct {
-	apiURL string
-}
+type authRepository struct {}
 
 func NewAuthRepository() AuthRepository {
 	return &authRepository{}
@@ -66,7 +64,7 @@ func (r *authRepository) GetNonce() (*models.NonceResponse, error) {
 	}
 
 	req.Header.Set("Qiscus_sdk_app_id", "rvcbl-fcsngqk40iyo7ks")
-	req.Header.Set("Origin", "https://omnichannel.qiscus.com")
+	req.Header.Set("Origin", config.AppConfig.QiscusBaseURL)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}

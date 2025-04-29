@@ -30,6 +30,8 @@ func (r *chatRepo) InitiateChat(reqData *models.InitiateChatRequest) (*models.In
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Qiscus-App-Id", config.AppConfig.QiscusAppID)
+	req.Header.Set("Origin", config.AppConfig.QiscusBaseURL)
 
 	client := &http.Client{}
 	res, err := client.Do(req)
