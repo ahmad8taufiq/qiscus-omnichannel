@@ -133,8 +133,6 @@ func GetNonce(redisSvc service.RedisService) (nonce string, err error) {
 		return "", err
 	}
 
-	log.Logger.Infof("nonceResp: %v", nonceResp)
-
 	ttl := time.Minute * 10
 	if err := redisSvc.SetCache(config.AppConfig.Nonce, nonceResp.Results.Nonce, ttl); err != nil {
 		log.Logger.WithFields(logrus.Fields{
@@ -143,6 +141,6 @@ func GetNonce(redisSvc service.RedisService) (nonce string, err error) {
 		}).WithError(err).Error("❌ Failed to set nonce cache")
 	}
 
-	log.Logger.Infof("✅ Nonce (from qiscus): %s", nonceResp.Results.Nonce)
+	// log.Logger.Infof("✅ Nonce (from qiscus): %s", nonceResp.Results.Nonce)
 	return nonceResp.Results.Nonce, nil
 }
