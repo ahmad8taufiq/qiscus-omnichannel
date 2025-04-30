@@ -6,13 +6,14 @@ import (
 	"strconv"
 	"time"
 
+	"qiscus-omnichannel/config"
 	"qiscus-omnichannel/models"
 	"qiscus-omnichannel/service"
 	"qiscus-omnichannel/tools/logger"
 	"qiscus-omnichannel/tools/response"
 )
 
-func ChatWithDelayHandler(chatSvc service.ChatService, commentSvc service.CommentService) http.HandlerFunc {
+func ChatWithDelayHandler(chatSvc service.ChatService, commentSvc service.CommentService, authSvc service.AuthService, roomSvc service.RoomService, redisSvc service.RedisService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			response.NotFound(w, "Method not allowed")
@@ -41,42 +42,78 @@ func ChatWithDelayHandler(chatSvc service.ChatService, commentSvc service.Commen
 
 		var results []map[string]interface{}
 
-		for _, req := range requests {
-			chatResp, err := chatSvc.InitiateChat(&req)
+		nonce, err := GetNonce(redisSvc)
+		if err != nil {
+			logger.Logger.WithError(err).Error("Failed to get nonce")
+		}
+
+		for i := range requests {
+			requests[i].AppID = config.AppConfig.QiscusAppID
+			requests[i].ChannelID = "130821"
+			requests[i].Avatar = "https://omnichannel.qiscus.com/img/ic_qiscus_client.png"
+			requests[i].Nonce = nonce
+			requests[i].Email = requests[i].UserID
+			requests[i].Origin = "https://omnichannel.qiscus.com/iframes/v4/rvcbl-fcsngqk40iyo7ks/multichannel-widget/130821"
+
+			initChatResp, err := chatSvc.InitiateChat(&requests[i])
 			if err != nil {
 				logger.Logger.WithError(err).Error("Failed to initiate chat")
 				results = append(results, map[string]interface{}{
-					"user_id": req.UserID,
+					"user_id": requests[i].UserID,
 					"error":   "initiate_chat_failed",
 				})
 				continue
 			}
 
+			verifyTokenResp, err := authSvc.VerifyToken(&models.VerifyTokenRequest{
+				IdentityToken: initChatResp.Data.IdentityToken,
+			})
+			if err != nil {
+				logger.Logger.WithError(err).Error("Failed to verify token")
+				results = append(results, map[string]interface{}{
+					"user_id": requests[i].UserID,
+					"error":   "verify_token_failed",
+				})
+				continue
+			}
+
+			roomIdResp, err := roomSvc.GetRoomById(initChatResp.Data.CustomerRoom.RoomID, verifyTokenResp.Results.User.Token, "")
+			if err != nil {
+				logger.Logger.WithError(err).Error("Failed to get room by id")
+				results = append(results, map[string]interface{}{
+					"user_id": requests[i].UserID,
+					"error":   "get_room_by_id_failed",
+				})
+				continue
+			}
+
 			commentReq := models.PostCommentRequest{
-				UserID:  req.UserID,
-				RoomID:  chatResp.Data.CustomerRoom.RoomID,
-				Message: "Halo, saya (" + req.UserID + ") ingin bertanya tentang",
+				Comment:  "Halo, saya " + requests[i].Name + " (" + requests[i].Email + ") ingin bertanya tentang",
+				TopicID: strconv.FormatInt(roomIdResp.Results.Room.LastTopicID, 10),
+				Type:    "text",
+				Payload: nil,
+				Extras: map[string]interface{}{},
 			}
 
 			if delayMs > 0 {
 				time.Sleep(time.Duration(delayMs) * time.Second)
 			}
 
-			_, err = commentSvc.PostComment(chatResp.Data.IdentityToken, &commentReq)
+			resp, err := commentSvc.PostComment(verifyTokenResp.Results.User.Token, initChatResp.Data.CustomerRoom.UserID, &commentReq)
 			if err != nil {
 				logger.Logger.WithError(err).Error("Failed to post comment")
 				results = append(results, map[string]interface{}{
-					"user_id": req.UserID,
-					"room_id": chatResp.Data.CustomerRoom.RoomID,
+					"comment": commentReq.Comment,
+					"topic_id": commentReq.TopicID,
 					"error":   "post_comment_failed",
 				})
 				continue
 			}
 
 			results = append(results, map[string]interface{}{
-				"user_id": req.UserID,
-				"room_id": chatResp.Data.CustomerRoom.RoomID,
-				"status":  "success",
+				"comment": commentReq.Comment,
+				"topic_id": commentReq.TopicID,
+				"status":  resp.Status,
 			})
 		}
 

@@ -1,9 +1,12 @@
 package models
 
 type PostCommentRequest struct {
-	UserID  string `json:"user_id"`
-	RoomID  string `json:"room_id"`
-	Message string `json:"message"`
+	Comment string `json:"comment"`
+	TopicID string `json:"topic_id"`
+	UniqueTempID string `json:"unique_temp_id"`
+	Type string `json:"type"`
+	Payload interface{} `json:"payload"`
+	Extras interface{} `json:"extras"`
 }
 
 type PostCommentResponse struct {

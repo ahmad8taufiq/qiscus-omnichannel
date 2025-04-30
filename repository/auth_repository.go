@@ -14,6 +14,7 @@ import (
 
 type AuthRepository interface {
 	GetNonce() (*models.NonceResponse, error)
+	VerifyToken(reqData *models.VerifyTokenRequest) (*models.VerifyTokenResponse, error)
 	Authenticate(email, password string) (*models.AuthResponse, error)
 }
 
@@ -84,4 +85,35 @@ func (r *authRepository) GetNonce() (*models.NonceResponse, error) {
 	}
 
 	return &nonceResp, nil
+}
+
+func (r *authRepository) VerifyToken(reqData *models.VerifyTokenRequest) (*models.VerifyTokenResponse, error) {
+	reqBody, err := json.Marshal(reqData)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v2/sdk/auth/verify_identity_token", config.AppConfig.QiscusApiURL), bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Qiscus_sdk_app_id", config.AppConfig.QiscusAppID)
+	req.Header.Set("Origin", config.AppConfig.QiscusBaseURL)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	var response models.VerifyTokenResponse
+	err = json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response, nil
 }

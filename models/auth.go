@@ -37,3 +37,15 @@ type NonceResponse struct {
 		Nonce     string `json:"nonce"`
 	} `json:"results"`
 }
+
+type VerifyTokenRequest struct {
+	IdentityToken    string `json:"identity_token"`
+}
+
+type VerifyTokenResponse struct {
+	Results struct {
+		User struct {
+			Token string `json:"token"`
+		} `json:"user"`
+	} `json:"results"`
+}

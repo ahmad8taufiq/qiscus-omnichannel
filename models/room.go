@@ -38,6 +38,7 @@ type SdkRoomResponse struct {
 	Results struct {
 		Room struct {
 			LastCommentID int64 `json:"last_comment_id"`
+			LastTopicID int64 `json:"last_topic_id"`
 		} `json:"room"`
 	} `json:"results"`
 }

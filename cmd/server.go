@@ -29,7 +29,7 @@ func init() {
 func runServer(_ *cobra.Command, _ []string) {
 	log := logger.Logger
 	redisRepo := repository.NewRedisRepository()
-	configService := service.RedisService(redisRepo)
+	redisService := service.RedisService(redisRepo)
 	
 	chatRepo := repository.NewChatRepository()
 	chatService := service.ChatService(chatRepo)
@@ -37,12 +37,18 @@ func runServer(_ *cobra.Command, _ []string) {
 	commentRepo := repository.NewCommentRepository()
 	commentService := service.CommentService(commentRepo)
 
+	authRepo := repository.NewAuthRepository()
+	authService := service.NewAuthService(authRepo)
+
+	roomRepo := repository.NewRoomRepository()
+	roomService := service.RoomService(roomRepo)
+
 	http.HandleFunc("/config", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			app.GetMaxCustomerPerAgentHandler(configService)(w, r)
+			app.GetMaxCustomerPerAgentHandler(redisService)(w, r)
 		case http.MethodPut:
-			app.SetMaxCustomerPerAgentHandler(configService)(w, r)
+			app.SetMaxCustomerPerAgentHandler(redisService)(w, r)
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
@@ -51,7 +57,7 @@ func runServer(_ *cobra.Command, _ []string) {
 	http.HandleFunc("/chat", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			app.ChatWithDelayHandler(chatService, commentService)(w, r)
+			app.ChatWithDelayHandler(chatService, commentService, authService, roomService, redisService)(w, r)
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}

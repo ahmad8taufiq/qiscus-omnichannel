@@ -29,7 +29,10 @@ func (r *roomRepo) GetRoomById(roomID, sdkToken, sdkUserID string) (*models.SdkR
 
 	req.Header.Set("Qiscus-Sdk-App-Id", config.AppConfig.QiscusAppID)
 	req.Header.Set("Qiscus-Sdk-Token", sdkToken)
-	req.Header.Set("Qiscus-Sdk-User-Id", sdkUserID)
+
+	if sdkUserID != "" {
+		req.Header.Set("Qiscus-Sdk-User-Id", sdkUserID)
+	}
 
 	client := &http.Client{}
 	res, err := client.Do(req)

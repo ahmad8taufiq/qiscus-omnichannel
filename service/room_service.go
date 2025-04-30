@@ -6,7 +6,7 @@ import (
 )
 
 type RoomService interface {
-	GetRoomById(roomID string, sdkToken string, sdkUserID string) (*models.SdkRoomResponse, error)
+	GetRoomById(roomID, sdkToken, sdkUserID string) (*models.SdkRoomResponse, error)
 }
 
 type roomService struct {
@@ -17,6 +17,6 @@ func NewRoomService(repo repository.RoomRepository) RoomService {
 	return &roomService{repo: repo}
 }
 
-func (s *roomService) GetRoomById(roomID string, sdkToken string, sdkUserID string) (*models.SdkRoomResponse, error) {
+func (s *roomService) GetRoomById(roomID, sdkToken, sdkUserID string) (*models.SdkRoomResponse, error) {
 	return s.repo.GetRoomById(roomID, sdkToken, sdkUserID)
 }

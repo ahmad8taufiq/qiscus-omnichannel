@@ -9,7 +9,7 @@ import (
 )
 
 type CommentRepository interface {
-	PostComment(secret string, req *models.PostCommentRequest) (*models.PostCommentResponse, error)
+	PostComment(token, userId string, req *models.PostCommentRequest) (*models.PostCommentResponse, error)
 }
 
 type commentRepo struct{}
@@ -18,20 +18,23 @@ func NewCommentRepository() CommentRepository {
 	return &commentRepo{}
 }
 
-func (r *commentRepo) PostComment(secret string, reqData *models.PostCommentRequest) (*models.PostCommentResponse, error) {
+func (r *commentRepo) PostComment(token, userId string, reqData *models.PostCommentRequest) (*models.PostCommentResponse, error) {
 	reqBody, err := json.Marshal(reqData)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", config.AppConfig.QiscusApi21URL+"/api/v2.1/rest/post_comment", bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest("POST", config.AppConfig.QiscusApi21URL+"/api/v2/sdk/post_comment", bytes.NewBuffer(reqBody))
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("QISCUS-SDK-APP-ID", config.AppConfig.QiscusAppID)
-	req.Header.Set("QISCUS-SDK-SECRET", secret)
+	req.Header.Set("Qiscus-Sdk-App-Id", config.AppConfig.QiscusAppID)
+	req.Header.Set("Qiscus-Sdk-Token", token)
+	req.Header.Set("Qiscus-Sdk-User-Id", userId)
+	req.Header.Set("Qiscus-Sdk-Version", "WEB_2.10.9")
+	req.Header.Set("Origin", config.AppConfig.QiscusBaseURL)
 
 	client := &http.Client{}
 	res, err := client.Do(req)

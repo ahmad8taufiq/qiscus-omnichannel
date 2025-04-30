@@ -7,6 +7,7 @@ import (
 
 type AuthService interface {
 	Nonce() (*models.NonceResponse, error)
+	VerifyToken(req *models.VerifyTokenRequest) (*models.VerifyTokenResponse, error)
 	Login(email, password string) (*models.AuthResponse, error)
 }
 
@@ -24,4 +25,8 @@ func (s *authService) Login(email, password string) (*models.AuthResponse, error
 
 func (s *authService) Nonce() (*models.NonceResponse, error) {
 	return s.repo.GetNonce()
+}
+
+func (s *authService) VerifyToken(req *models.VerifyTokenRequest) (*models.VerifyTokenResponse, error) {
+	return s.repo.VerifyToken(req)
 }
