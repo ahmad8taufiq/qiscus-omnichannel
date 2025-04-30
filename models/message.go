@@ -8,4 +8,5 @@ type Message struct {
 	LatestService	string	`json:"latest_service"`
 	Name 			string	`json:"name"`
 	RoomId 			string	`json:"room_id"`
+	AgentID			string	`json:"agent_id"`
 }

@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"qiscus-omnichannel/models"
@@ -37,8 +39,7 @@ func StartDequeueListener() {
 			adminToken, _, sdkToken, err := GetCredentials(redisService)
 			if err != nil {
 				log.WithError(err).Error("❌ Dequeue failed to get credentials")
-				// err := redisService.Backqueue("new_session_queue", payload)
-				err := redisService.BackQueueAtomic("new_session_queue", string(payload))
+				err := redisService.BackQueueAtomic("customer_queue", string(payload))
 				if err != nil {
 					log.WithError(err).Error("❌ Failed to backqueue message due to dequeue error")
 				}
@@ -51,8 +52,7 @@ func StartDequeueListener() {
 			availableAgent, err := agentService.GetAvailableAgents(adminToken, newMessage.RoomId)
 			if err != nil {
 				log.WithError(err).Error("❌ Failed to get available agents")
-				// err := redisService.Backqueue("new_session_queue", payload)
-				err := redisService.BackQueueAtomic("new_session_queue", string(payload))
+				err := redisService.BackQueueAtomic("customer_queue", string(payload))
 				if err != nil {
 					log.WithError(err).Error("❌ Failed to requeue message due to agent lookup failure")
 				}
@@ -60,11 +60,11 @@ func StartDequeueListener() {
 				continue
 			}
 
-			log.Infof("👤 Available agents: %v", availableAgent)
-
 			assigned := false
 			for _, agent := range availableAgent.Data.Agents {
-				if agent.CurrentCustomerCount < 2 {
+				agentCache, _ := redisService.GetCache(fmt.Sprintf("%d", agent.ID))
+				agentCount, _ := strconv.Atoi(agentCache)
+				if agentCount < 2 {
 					log.Infof("🧑 Assigning agent %s (ID: %d)", agent.Name, agent.ID)
 
 					assignResp, err := agentService.AssignAgent(newMessage.RoomId, agent.ID)
@@ -74,6 +74,8 @@ func StartDequeueListener() {
 					}
 
 					assigned = true
+					newMessage.AgentID = fmt.Sprintf("%d", agent.ID)
+					redisService.SetCache(fmt.Sprintf("%d", agent.ID), fmt.Sprintf("%d", agentCount+1), time.Minute * 10)
 					err = redisService.Enqueue("assigned", newMessage)
 					if err != nil {
 						log.WithError(err).Error("❌ Failed to enqueue to assigned queue")
@@ -88,8 +90,7 @@ func StartDequeueListener() {
 
 			if !assigned {
 				log.Warn("⚠️ No available agent (all full), requeueing message...")
-				// err := redisService.Backqueue("new_session_queue", payload)
-				err := redisService.BackQueueAtomic("new_session_queue", string(payload))
+				err := redisService.BackQueueAtomic("customer_queue", string(payload))
 				if err != nil {
 					log.WithError(err).Error("❌ Failed to requeue message")
 				} else {

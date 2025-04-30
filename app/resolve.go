@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -69,6 +70,10 @@ func StartResolveListener() {
 				time.Sleep(3 * time.Second)
 				continue
 			}
+
+			agentCache, _ := redisService.GetCache(assignedMessage.AgentID)
+			agentCount, _ := strconv.Atoi(agentCache)
+			redisService.SetCache(assignedMessage.AgentID, fmt.Sprintf("%d", agentCount-1), time.Minute * 10)
 
 			log.Infof("✅ Resolved: %v", resolved.Data.Service.IsResolved)
 		} else {

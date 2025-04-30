@@ -45,26 +45,12 @@ func WebhookHandler(log *logrus.Logger, redisSvc service.RedisService) http.Hand
 		}
 
 		log.WithFields(logrus.Fields{
+			"room_id":        data.RoomId,
+			"name":           data.Name,
 			"email":          data.Email,
 			"is_new_session": data.IsNewSession,
 			"is_resolved":    data.IsResolved,
-			"latest_service": data.LatestService,
-			"name":           data.Name,
-			"room_id":        data.RoomId,
 		}).Info("✅ Parsed Message")
-
-		if data.CandidateAgent != nil {
-			log.WithFields(logrus.Fields{
-				"id":             data.CandidateAgent.ID,
-				"email":          data.CandidateAgent.Email,
-				"name":           data.CandidateAgent.Name,
-				"type":           data.CandidateAgent.Type,
-				"type_as_string": data.CandidateAgent.TypeAsString,
-				"is_available":   data.CandidateAgent.IsAvailable,
-			}).Info("🧑‍💼 Candidate Agent Details")
-		} else {
-			log.Info("⚠️ CandidateAgent is nil")
-		}
 
 		if data.IsNewSession {
 			err := redisSvc.Enqueue("new_session_queue", data)
