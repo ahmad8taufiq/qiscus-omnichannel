@@ -1,7 +1,7 @@
 package app
 
 import (
-	"fmt"
+	"encoding/json"
 	"strconv"
 	"time"
 
@@ -71,10 +71,28 @@ func StartResolveListener() {
 				continue
 			}
 
-			agentCache, _ := redisService.GetCache(assignedMessage.AgentID)
-			agentCount, _ := strconv.Atoi(agentCache)
-			redisService.SetCache(assignedMessage.AgentID, fmt.Sprintf("%d", agentCount-1), time.Minute * 10)
+			var agents []models.Agents
+			cached, err := redisService.GetCache("agents")
+			if err == nil && cached != "" {
+				err = json.Unmarshal([]byte(cached), &agents)
+				if err != nil {
+					logger.Logger.Info("⚠️ Failed to unmarshal cached agents, starting fresh")
+					agents = []models.Agents{}
+				}
+			} else {
+				agents = []models.Agents{}
+			}
 
+			agentID, _ := strconv.Atoi(assignedMessage.AgentID)
+			for i, agent := range agents {
+				if agent.ID == agentID {
+					agents[i].CurrentCustomerCount -= 1
+					break
+				}
+			}
+
+			updatedJSON, _ := json.Marshal(agents)
+			redisService.SetCache("agents", string(updatedJSON), 10*time.Minute)
 			log.Infof("✅ Resolved: %v", resolved.Data.Service.IsResolved)
 		} else {
 			log.Debug("⏳ No message in assigned, waiting...")
