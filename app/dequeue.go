@@ -86,17 +86,6 @@ func StartDequeueListener() {
 
 		redisRepo.SetCache("agents", jsonString, 10*time.Minute)
 
-		cached, err = redisService.GetCache("agents")
-		if err == nil && cached != "" {
-			err = json.Unmarshal([]byte(cached), &agents)
-			if err != nil {
-				logger.Logger.Info("⚠️ Failed to unmarshal cached agents, starting fresh")
-				agents = []models.Agents{}
-			}
-		} else {
-			agents = []models.Agents{}
-		}
-
 		if len(agents) == 0 {
 			log.Warn("⚠️ No available agent, requeueing message...")
 			err := redisService.BackQueueAtomic("new_session_queue", string(payload))
