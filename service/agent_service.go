@@ -1,9 +1,10 @@
 package service
 
 import (
-	"fmt"
+	"encoding/json"
 	"qiscus-omnichannel/models"
 	"qiscus-omnichannel/repository"
+	"qiscus-omnichannel/tools/logger"
 	"time"
 )
 
@@ -29,22 +30,43 @@ func (s *agentService) MarkAsResolved(roomID, notes, lastCommentID string) (*mod
 	return s.repo.MarkAsResolved(roomID, notes, lastCommentID)
 }
 
-// func (s *agentService) GetAvailableAgents(adminToken, roomID string) (*models.AvailableAgentsResponse, error) {
-// 	return s.repo.GetAvailableAgents(adminToken, roomID)
-// }
-
 func (s *agentService) GetAvailableAgents(adminToken, roomID string) (*models.AvailableAgentsResponse, error) {
 	redisRepo := repository.NewRedisRepository()
 	redisService := RedisService(redisRepo)
 
-	availableAgent, _ := s.repo.GetAvailableAgents(adminToken, roomID)
-
-	for _, agent := range availableAgent.Data.Agents {
-		_, err := redisService.GetCache(fmt.Sprintf("%d", agent.ID))
+	var agents []models.Agents
+	cached, err := redisService.GetCache("agents")
+	if err == nil && cached != "" {
+		err = json.Unmarshal([]byte(cached), &agents)
 		if err != nil {
-			redisService.SetCache(fmt.Sprintf("%d", agent.ID), fmt.Sprintf("%d", agent.CurrentCustomerCount), time.Minute * 10)
+			logger.Logger.Info("⚠️ Failed to unmarshal cached agents, starting fresh")
+			agents = []models.Agents{}
+		}
+	} else {
+		agents = []models.Agents{}
+	}
+
+	availableAgent, _ := s.repo.GetAvailableAgents(adminToken, roomID)
+	for _, agent := range availableAgent.Data.Agents {
+		exists := false
+		for _, a := range agents {
+			if a.ID == agent.ID {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			agents = append(agents, models.Agents{
+				ID:                    agent.ID,
+				CurrentCustomerCount:  agent.CurrentCustomerCount,
+			})
 		}
 	}
+
+	jsonBytes, _ := json.Marshal(agents)
+	jsonString := string(jsonBytes)
+
+	redisRepo.SetCache("agents", jsonString, 10*time.Minute)
 
 	return availableAgent, nil
 }
