@@ -16,14 +16,13 @@ import (
 var serverPort int
 
 var serverCmd = &cobra.Command{
-	Use:   "server",
+	Use:   "serve",
 	Short: "Start server",
 	Run:   runServer,
 }
 
 func init() {
 	serverCmd.Flags().IntVarP(&serverPort, "port", "p", 8081, "Port for constant server")
-	rootCmd.AddCommand(serverCmd)
 }
 
 func runServer(_ *cobra.Command, _ []string) {

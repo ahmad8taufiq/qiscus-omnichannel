@@ -23,6 +23,7 @@ type RedisRepository interface {
 	Dequeue(key string) ([]byte, error)
 	Backqueue(key string, value interface{}) error
 	BackQueueAtomic(key string, value string) error
+	DequeueByField(key, field, value string) ([]byte, error)
 }
 
 type redisRepository struct {
@@ -121,4 +122,27 @@ func (r *redisRepository) BackQueueAtomic(key string, value string) error {
     script := `return redis.call('LPUSH', KEYS[1], ARGV[1])`
     _, err := r.client.Eval(context.Background(), script, []string{key}, value).Result()
     return err
+}
+
+func (r *redisRepository) DequeueByField(key, field, value string) ([]byte, error) {
+	items, err := r.client.LRange(r.ctx, key, 0, -1).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range items {
+		var data map[string]interface{}
+		if err := json.Unmarshal([]byte(item), &data); err != nil {
+			continue
+		}
+
+		if val, ok := data[field]; ok && fmt.Sprintf("%v", val) == value {
+			if _, err := r.client.LRem(r.ctx, key, 1, item).Result(); err != nil {
+				return nil, err
+			}
+			return []byte(item), nil
+		}
+	}
+
+	return nil, fmt.Errorf("no matching item found where %s = %s", field, value)
 }

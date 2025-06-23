@@ -18,5 +18,6 @@ func main() {
 		return
 	}
 
-	fmt.Println("✅ Auth Token:", authResp.Data.Details.SdkUser.Token)
+	// fmt.Println("✅ Auth Token:", authResp.Data.Details.SdkUser.Token)
+	fmt.Println("✅ Auth Token:", authResp)
 }

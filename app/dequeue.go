@@ -86,7 +86,7 @@ func StartDequeueListener() {
 
 		redisRepo.SetCache("agents", jsonString, 10*time.Minute)
 
-		if len(agents) == 0 {
+		if len(agents) == 0 || allFull(agents) {
 			log.Warn("⚠️ No available agent, requeueing message...")
 			err := redisService.BackQueueAtomic("new_session_queue", string(payload))
 			if err != nil {
@@ -137,4 +137,13 @@ func StartDequeueListener() {
 			}
 		}
 	}
+}
+
+func allFull(agents []models.Agents) bool {
+	for _, agent := range agents {
+		if agent.CurrentCustomerCount < 2 {
+			return false
+		}
+	}
+	return true
 }

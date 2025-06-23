@@ -14,6 +14,7 @@ func Execute() error {
 }
 
 func init() {
-	rootCmd.AddCommand(webhookCmd)
 	rootCmd.AddCommand(serverCmd)
+	rootCmd.AddCommand(webhookCmd)
+	rootCmd.AddCommand(webhookResolveCmd)
 }

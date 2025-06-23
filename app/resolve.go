@@ -79,8 +79,6 @@ func StartResolveListener() {
 					logger.Logger.Info("⚠️ Failed to unmarshal cached agents, starting fresh")
 					agents = []models.Agents{}
 				}
-			} else {
-				agents = []models.Agents{}
 			}
 
 			agentID, _ := strconv.Atoi(assignedMessage.AgentID)

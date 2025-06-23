@@ -20,6 +20,16 @@
       "args": ["dequeue"],
       "env": {},
       "showLog": true
+    },
+    {
+      "name": "Webhook Resolve",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}",
+      "args": ["webhook-resolve"],
+      "env": {},
+      "showLog": true
     }
   ]
 }
