@@ -15,7 +15,7 @@ import (
 var webhookResolvePort int
 
 var webhookResolveCmd = &cobra.Command{
-	Use:   "webhook-resolve",
+	Use:   "resolve",
 	Short: "Start webhook resolve listener",
 	Run:   runWebhookResolveServer,
 }

@@ -7,7 +7,7 @@ import (
 )
 
 var resolveCmd = &cobra.Command{
-	Use:   "resolve",
+	Use:   "resolve-all",
 	Short: "Start Redis resolve assigned listener",
 	Run: func(cmd *cobra.Command, args []string) {
 		app.StartResolveListener()
