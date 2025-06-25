@@ -2,7 +2,7 @@ package app
 
 import (
 	"encoding/json"
-	"strconv"
+	// "strconv"
 	"time"
 
 	"qiscus-omnichannel/models"
@@ -125,13 +125,13 @@ func StartDequeueListener() {
 					log.Fatalf("SetCache failed: %v", err)
 				}
 
-				newMessage.AgentID = strconv.Itoa(minAgent.ID)
-				err = redisService.Enqueue("assigned", newMessage)
-				if err != nil {
-					log.WithError(err).Error("❌ Failed to enqueue to assigned queue")
-				} else {
-					log.Info("📤 Data assigned to Redis successfully")
-				}
+				// newMessage.AgentID = strconv.Itoa(minAgent.ID)
+				// err = redisService.Enqueue("assigned", newMessage)
+				// if err != nil {
+				// 	log.WithError(err).Error("❌ Failed to enqueue to assigned queue")
+				// } else {
+				// 	log.Info("📤 Data assigned to Redis successfully")
+				// }
 				
 				log.Infof("✅ Agent assigned successfully: %+v", assignResp.Data)
 			}
