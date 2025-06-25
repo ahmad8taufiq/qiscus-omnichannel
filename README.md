@@ -92,3 +92,13 @@ sequenceDiagram
 #### Database Design
 
 ![Database Design](https://raw.githubusercontent.com/ahmad8taufiq/qiscus-omnichannel/refs/heads/main/database_design.png)
+
+```
+classDiagram
+    Config : string SdkToken
+    Config : string AdminToken
+    Config : string SdkEmail
+
+    CustomerCount : string ID (Agent ID)
+    CustomerCount : int CurrentCustomerCount
+```
