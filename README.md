@@ -68,6 +68,7 @@ sequenceDiagram
     participant Queue
     participant Dequeue
     participant AgentService
+    participant WebhookResolve
 
     Customer->>Qiscus: Chat
     Qiscus->>Webhook: Forward chat
@@ -77,17 +78,15 @@ sequenceDiagram
     Dequeue->>AgentService: Check agent availability
     AgentService-->>Dequeue: Agent found?
 
-    alt No agent available or full
+    alt No agent or agent full
         Dequeue->>Queue: Re-queue chat
-    else Agent available
-        AgentService->>Dequeue: Agent with <2 customers
+    else Agent available and has < 2 customers
         Dequeue->>AgentService: Assign customer
         AgentService->>AgentService: Increment customer count
     end
 
-    Qiscus->>Webhook: Notify resolved chat
-    Webhook->>AgentService: Decrement customer count
-
+    Qiscus->>WebhookResolve: Notify resolved chat
+    WebhookResolve->>AgentService: Decrement customer count
 ```
 
 #### Database Design
