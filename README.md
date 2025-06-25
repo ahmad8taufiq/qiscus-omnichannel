@@ -37,7 +37,7 @@ A Service to automatically assign available agents to customer chats in Qiscus O
 
 ### Flowchart
 
-![Flowchart](https://raw.githubusercontent.com/ahmad8taufiq/qiscus-omnichannel/refs/heads/main/flowchart.png)
+![Flowchart](https://raw.githubusercontent.com/ahmad8taufiq/qiscus-omnichannel/fc311a474ac6ef8cf34dccabe93df11b60b45975/flowchart.png)
 
 ```
 flowchart TD
